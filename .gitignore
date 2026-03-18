@@ -1,0 +1,91 @@
+# =========================
+# .NET / C# / ASP.NET
+# =========================
+
+# Build results
+bin/
+obj/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# =========================
+# OS files
+# =========================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# =========================
+# NuGet
+# =========================
+
+# Packages
+*.nupkg
+*.snupkg
+
+# NuGet cache
+packages/
+
+# =========================
+# ASP.NET
+# =========================
+
+# Generated files
+*.db
+*.sqlite
+*.sqlite3
+
+# IIS / Kestrel logs
+logs/
+
+# =========================
+# Environment / Secrets
+# =========================
+
+# Environment variables
+.env
+.env.*
+
+# User secrets
+secrets.json
+
+# =========================
+# Test / Coverage
+# =========================
+
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# =========================
+# Node (if used later)
+# =========================
+
+node_modules/
+dist/
+
+# =========================
+# Misc
+# =========================
+
+*.tmp
+*.temp
+*.bak
+*.swp

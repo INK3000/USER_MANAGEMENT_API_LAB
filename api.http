@@ -1,0 +1,154 @@
+@host = http://localhost:5083
+@apikey = dev-api-key-1
+
+# ------------------------------------------------------------
+# CREATE_USER
+# Description: Create a new user "Evan".
+# Expectation:
+#  - Status: 201 Created
+#  - Content-Type: application/json
+#  - Body: created user object with numeric "id", e.g.
+#    { "id": 5, "userName":"Evan", "userAge":35, "role":"Guest" }
+# Notes:
+#  - We capture the response to use the created id in later requests.
+### CREATE_USER
+POST {{host}}/users
+X-Api-Key: {{apikey}}
+Content-Type: application/json
+
+{
+  "userName": "Evan",
+  "userAge": 35,
+  "role": "Guest"
+}
+
+###
+
+# ------------------------------------------------------------
+# GET_CREATED_USER
+# Description: Retrieve the user created by CREATE_USER using captured id.
+# Expectation:
+#  - Status: 200 OK
+#  - Content-Type: application/json
+#  - Body: the user object matching the created id
+# Notes:
+#  - Uses captured id from CREATE_USER.response.body.$.id
+### GET_CREATED_USER
+GET {{host}}/users/{{CREATE_USER.response.body.$.id}}
+X-Api-Key: {{apikey}}
+
+###
+
+# ------------------------------------------------------------
+# UPDATE_CREATED_USER
+# Description: Update the user created earlier.
+# Expectation:
+#  - Status: 200 OK
+#  - Content-Type: application/json
+#  - Body: updated user object with same id and new fields
+### UPDATE_CREATED_USER
+PUT {{host}}/users/{{CREATE_USER.response.body.$.id}}
+X-Api-Key: {{apikey}}
+Content-Type: application/json
+
+{
+  "userName": "Evan Updated",
+  "userAge": 36,
+  "role": "Guest"
+}
+
+###
+
+# ------------------------------------------------------------
+# DELETE_CREATED_USER
+# Description: Delete the user created earlier.
+# Expectation:
+#  - Status: 200 OK
+#  - Content-Type: application/json
+#  - Body: { "message": "User with id X deleted" }
+### DELETE_CREATED_USER
+DELETE {{host}}/users/{{CREATE_USER.response.body.$.id}}
+X-Api-Key: {{apikey}}
+
+###
+
+# ------------------------------------------------------------
+# LIST_USERS
+# Description: List users with pagination.
+# Expectation:
+#  - Status: 200 OK
+#  - Content-Type: application/json
+#  - Body: { page, pageSize, total, items: [...] }
+### LIST_USERS
+GET {{host}}/users?page=1&pageSize=10
+X-Api-Key: {{apikey}}
+
+###
+
+# ------------------------------------------------------------
+# CREATE_USER_BAD_AGE
+# Description: Create user with wrong type for userAge (string).
+# Expectation:
+#  - Status: 400 Bad Request
+#  - Content-Type: application/problem+json
+#  - Body: ProblemDetails or ValidationProblemDetails describing the error
+# Notes:
+#  - Our global middleware should return application/problem+json with details.
+### CREATE_USER_BAD_AGE
+POST {{host}}/users
+X-Api-Key: {{apikey}}
+Content-Type: application/json
+
+{
+  "userName": "AgeAsString",
+  "userAge": "thirty",
+  "role": "User"
+}
+
+###
+
+# ------------------------------------------------------------
+# GET_NONINT_ID
+# Description: Request with non-integer id (route mismatch).
+# Expectation:
+#  - Status: 404 Not Found
+#  - Content-Type: application/problem+json
+#  - Body: ProblemDetails with type "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+# Notes:
+#  - Previously returned plain text; normalized middleware should return ProblemDetails.
+### GET_NONINT_ID
+GET {{host}}/users/abc
+X-Api-Key: {{apikey}}
+
+###
+
+# ------------------------------------------------------------
+# GET_NOT_FOUND
+# Description: Request a user id that does not exist.
+# Expectation:
+#  - Status: 404 Not Found
+#  - Content-Type: application/problem+json
+#  - Body: ProblemDetails with type "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+# Notes:
+#  - If endpoint returns custom JSON { "error": "..."} middleware will normalize it.
+### GET_NOT_FOUND
+GET {{host}}/users/999999
+X-Api-Key: {{apikey}}
+
+###
+
+# ------------------------------------------------------------
+# UNAUTHENTICATED_REQUEST
+# Description: Attempt to access a protected endpoint without X-Api-Key header.
+# Expectation:
+#  - Status: 401 Unauthorized
+#  - Content-Type: application/problem+json
+#  - Body: ProblemDetails with type "https://example.com/probs/unauthorized" and status 401
+# Notes:
+#  - This request intentionally omits the X-Api-Key header to verify the auth middleware.
+### UNAUTHENTICATED_REQUEST
+GET {{host}}/users
+# no X-Api-Key header on purpose
+
+###
+
